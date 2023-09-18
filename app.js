@@ -33,7 +33,6 @@ import usersRouter from './routes/users.js'
 import googleLoginRouter from './routes/google-login.js'
 import lineLoginRouter from './routes/line-login.js'
 import facebookLoginRouter from './routes/facebook-login.js'
-
 import favoriteRouter from './routes/favorite.js'
 
 const app = express()
@@ -41,6 +40,9 @@ const app = express()
 // 檔案上傳
 // 選項參考: https://github.com/richardgirges/express-fileupload
 app.use(fileUpload())
+
+// 圖片讀取
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
 
 // 可以使用的CORS要求，options必要
 // app.use(cors())
@@ -110,5 +112,7 @@ app.use(function (err, req, res, next) {
   // 更改為錯誤訊息預設為JSON格式
   res.status(500).send({ error: err })
 })
+
+// 個人測試
 
 export default app
