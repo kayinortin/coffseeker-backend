@@ -19,7 +19,7 @@ router.get('/qs', async (req, res, next) => {
   const {
     page,
     keyword,
-    cat_ids,
+    product_ids,
     colors,
     tags,
     sizes,
@@ -38,8 +38,8 @@ router.get('/qs', async (req, res, next) => {
     ? `name LIKE ${sqlString.escape('%' + keyword + '%')}`
     : ''
 
-  // 分類，cat_id 使用 `cat_id IN (1, 2, 3, 4, 5)`
-  conditions[1] = cat_ids ? `cat_id IN (${cat_ids})` : ''
+  // 分類，product_id 使用 `product_id IN (1, 2, 3, 4, 5)`
+  conditions[1] = product_ids ? `product_id IN (${product_ids})` : ''
 
   // 顏色: FIND_IN_SET(1, color) OR FIND_IN_SET(2, color)
   const color_ids = colors ? colors.split(',') : []

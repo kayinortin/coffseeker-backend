@@ -28,6 +28,7 @@ import authRouter from './routes/auth.js'
 import emailRouter from './routes/email.js'
 import indexRouter from './routes/index.js'
 import productsRouter from './routes/products.js'
+import popularProductsRouter from './routes/popular-products.js'
 import resetPasswordRouter from './routes/reset-password.js'
 import usersRouter from './routes/users.js'
 import googleLoginRouter from './routes/google-login.js'
@@ -89,6 +90,7 @@ app.use('/api/auth-jwt', authJwtRouter)
 app.use('/api/auth', authRouter)
 app.use('/api/email', emailRouter)
 app.use('/api/products', productsRouter)
+app.use('/api/popular-products/hot', popularProductsRouter)
 app.use('/api/reset-password', resetPasswordRouter)
 app.use('/api/users', usersRouter)
 app.use('/api/google-login', googleLoginRouter)
