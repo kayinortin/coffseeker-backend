@@ -11,12 +11,6 @@ const getProducts = async () => {
   return rows
 }
 
-// 查詢熱門商品
-const getHotProducts = async () => {
-  const { rows } = await find(table, {}, { popularity: 'desc' }, 8)
-  return rows
-}
-
 // 查詢所有資料，加入分頁與搜尋字串功能
 // SELECT *
 // FROM product
@@ -57,7 +51,6 @@ const cleanAll = async () => await cleanTable(table)
 export {
   getProducts,
   getProductsWithQS,
-  getHotProducts,
   getProductById,
   createBulkProducts,
   cleanAll,
