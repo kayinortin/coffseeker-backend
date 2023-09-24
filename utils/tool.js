@@ -2,12 +2,9 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
-// 導入dotenv 使用 .env 檔案中的設定值 process.env
 import dotenv from 'dotenv'
 
 // 讓console.log可以呈現檔案與行號
-// console.log show line number
-//https://stackoverflow.com/questions/45395369/how-to-get-console-log-line-numbers-shown-in-nodejs
 function extendLog() {
   /* eslint-disable */
   ;['log', 'warn', 'error'].forEach((methodName) => {

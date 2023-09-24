@@ -1,13 +1,9 @@
 import express from 'express'
 const router = express.Router()
-
 import { findOne, insertOne, count } from '../models/base.js'
-
 import jsonwebtoken from 'jsonwebtoken'
-// 存取`.env`設定檔案使用
 import 'dotenv/config.js'
 
-// 定義安全的私鑰字串
 const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET
 
 router.post('/jwt', async function (req, res, next) {
