@@ -1,16 +1,12 @@
 import express from 'express'
 const router = express.Router()
 import jsonwebtoken from 'jsonwebtoken'
-
 import { findOne, insertOne, count } from '../models/base.js'
-// line-login模組
 import line_login from '../services/line-login.js'
-
-// 存取`.env`設定檔案使用
 import 'dotenv/config.js'
 
-// 定義安全的私鑰字串
 const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET
+
 // line 登入使用
 const channel_id = process.env.LINE_CHANNEL_ID
 const channel_secret = process.env.LINE_CHANNEL_SECRET

@@ -1,4 +1,3 @@
-// 認証用的 middleware
 export default function auth(req, res, next) {
   if (req.session.userId) {
     console.log('authenticated')

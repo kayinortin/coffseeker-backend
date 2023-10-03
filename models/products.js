@@ -44,6 +44,7 @@ const getProductById = async (id) => await findOneById(table, id)
 const createBulkProducts = async (users) => await insertMany(table, users)
 
 // 其它用途
+
 // 清除表格資料
 const cleanAll = async () => await cleanTable(table)
 
