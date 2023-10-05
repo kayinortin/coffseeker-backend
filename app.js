@@ -45,6 +45,8 @@ import lineLoginRouter from './routes/line-login.js'
 import facebookLoginRouter from './routes/facebook-login.js'
 // 導入favorite路由
 import favoriteRouter from './routes/favorite.js'
+// 導入checkcategory路由
+import checkCategoryRouter from './routes/checkcategory.js'
 
 // 以上為導入區，以下為使用區
 const app = express()
@@ -106,6 +108,7 @@ app.use('/api/google-login', googleLoginRouter)
 app.use('/api/line-login', lineLoginRouter)
 app.use('/api/facebook-login', facebookLoginRouter)
 app.use('/api/favorite', favoriteRouter)
+app.use('/api/checkcategory', checkCategoryRouter)
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
