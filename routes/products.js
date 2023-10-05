@@ -28,8 +28,6 @@ router.get('/qs', async (req, res, next) => {
     price_range,
   } = req.query
 
-  // TODO: 這裡可以檢查各query string正確性或給預設值，檢查不足可能會產生查詢錯誤
-
   // 建立資料庫搜尋條件
   const conditions = []
 
@@ -45,18 +43,6 @@ router.get('/qs', async (req, res, next) => {
   const color_ids = colors ? colors.split(',') : []
   conditions[2] = color_ids
     .map((v) => `FIND_IN_SET(${Number(v)}, color)`)
-    .join(' OR ')
-
-  //  標籤: FIND_IN_SET(3, tag) OR FIND_IN_SET(2, tag)
-  const tag_ids = tags ? tags.split(',') : []
-  conditions[3] = tag_ids
-    .map((v) => `FIND_IN_SET(${Number(v)}, tag)`)
-    .join(' OR ')
-
-  //  尺寸: FIND_IN_SET(3, size) OR FIND_IN_SET(2, size)
-  const size_ids = sizes ? sizes.split(',') : []
-  conditions[4] = size_ids
-    .map((v) => `FIND_IN_SET(${Number(v)}, size)`)
     .join(' OR ')
 
   // 價格
@@ -118,9 +104,6 @@ router.get('/qs', async (req, res, next) => {
 
 // 獲得單筆資料
 router.get('/:pid', async (req, res, next) => {
-  console.log(req.params)
-
-  // 讀入範例資料
   const product = await getProductById(req.params.pid)
 
   if (product) {
