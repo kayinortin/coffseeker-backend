@@ -37,6 +37,7 @@ import favoriteRouter from './routes/favorite.js'
 import newsRouter from './routes/news.js'
 // 導入checkcategory路由
 import checkCategoryRouter from './routes/checkcategory.js'
+import couponRouter from './routes/coupons.js'
 
 const app = express()
 
@@ -100,6 +101,7 @@ app.use('/api/facebook-login', facebookLoginRouter)
 app.use('/api/favorite', favoriteRouter)
 app.use('/api/news', newsRouter)
 app.use('/api/checkcategory', checkCategoryRouter)
+app.use('/api/coupons', couponRouter)
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
