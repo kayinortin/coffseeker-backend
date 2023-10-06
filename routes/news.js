@@ -143,6 +143,7 @@ router.get('/', async (req, res, next) => {
   })
 })
 
+// 設定分類新聞的路由
 router.get('/category/:cid', async (req, res, next) => {
   try {
     const cid = req.params.cid
@@ -181,12 +182,12 @@ router.get('/category/:cid', async (req, res, next) => {
       return res.status(404).json({ error: '找不到相應分類的消息' })
     }
 
-    // 修正的 SQL 查詢
+    // SQL 查詢，包括分頁邏輯
     const query = `
-    SELECT * FROM news 
-    WHERE category_id = ? 
-    LIMIT ? OFFSET ?
-  `
+      SELECT * FROM news 
+      WHERE category_id = ? 
+      LIMIT ? OFFSET ?
+    `
 
     const [rows, fields] = await pool.execute(query, [
       categoryId,
@@ -199,9 +200,18 @@ router.get('/category/:cid', async (req, res, next) => {
       return res.status(404).json({ error: '找不到相應分類的消息' })
     }
 
-    // 若有找到對應消息則返回給前端
-    const news = rows
-    res.json(news)
+    // 計算總頁數
+    const countQuery = `
+      SELECT COUNT(*) as total FROM news
+      WHERE category_id = ?
+    `
+
+    const [countRows] = await pool.execute(countQuery, [categoryId])
+    const totalRows = countRows[0].total
+    const totalPages = Math.ceil(totalRows / perpageNow)
+
+    // 返回包含新聞和總頁數的 JSON
+    res.json({ news: rows, totalPages })
   } catch (error) {
     console.error('資料獲取失敗:', error.message)
     res.status(500).json({ error: '資料獲取失敗，請重試。' })
