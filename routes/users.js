@@ -89,21 +89,21 @@ router.post('/', async function (req, res, next) {
 
   // 檢查從瀏覽器來的資料，如果為空物件則失敗
   if (isEmpty(user)) {
-    return res.json({ message: 'fail', code: '400' })
+    return res.json({ message: 'fail-表單資料為空', code: '400' })
   }
 
   // 這裡可以再檢查從react來的資料，哪些資料為必要(name, username...)
   console.log(user)
 
   // 先查詢資料庫是否有同username與email的資料
-  const count = await getCount({
-    username: user.username,
+  const countMail = await getCount({
+    // username: user.username,
     email: user.email,
   })
 
   // 檢查使用者是否存在
-  if (count) {
-    return res.json({ message: 'fail', code: '400' })
+  if (countMail) {
+    return res.json({ message: 'fail-使用者已存在', code: '400' })
   }
 
   // 新增至資料庫
