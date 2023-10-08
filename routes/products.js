@@ -26,6 +26,7 @@ router.get('/qs', async (req, res, next) => {
     orderby,
     perpage,
     price_range,
+    search,
   } = req.query
 
   // 建立資料庫搜尋條件
@@ -44,6 +45,19 @@ router.get('/qs', async (req, res, next) => {
   conditions[2] = color_ids
     .map((v) => `FIND_IN_SET(${Number(v)}, color)`)
     .join(' OR ')
+
+  //模糊搜尋商品名稱(name)與敘述(description)
+  // 處理模糊搜尋字串的函式，預設搜尋字串用逗號分隔，例如"api/products/qs?search=中焙,花香"，會顯示所有商品名稱以及敘述有中焙或花香的商品
+  function createSearchConditions(searchString) {
+    const searchKeywordsArr = searchString.split(',')
+    const searchConditions = searchKeywordsArr.map((keyword) => {
+      return `name LIKE ${sqlString.escape(
+        '%' + keyword + '%'
+      )} OR description LIKE ${sqlString.escape('%' + keyword + '%')}`
+    })
+    return searchConditions.join(' OR ')
+  }
+  conditions[3] = createSearchConditions(search)
 
   // 價格
   const priceRanges = price_range ? price_range.split(',') : []
