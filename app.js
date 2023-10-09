@@ -35,6 +35,7 @@ import lineLoginRouter from './routes/line-login.js'
 import facebookLoginRouter from './routes/facebook-login.js'
 import favoriteRouter from './routes/favorite.js'
 import newsRouter from './routes/news.js'
+import orderRouter from './routes/order.js'
 // 導入checkcategory路由
 import checkCategoryRouter from './routes/checkcategory.js'
 
@@ -100,6 +101,7 @@ app.use('/api/facebook-login', facebookLoginRouter)
 app.use('/api/favorite', favoriteRouter)
 app.use('/api/news', newsRouter)
 app.use('/api/checkcategory', checkCategoryRouter)
+app.use('/api/order', orderRouter)
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
