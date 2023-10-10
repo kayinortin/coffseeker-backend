@@ -24,6 +24,7 @@ import {
   updateOrderById,
   verifyOrder,
   getOrdersByUserId,
+  getItemsByOrderId,
 } from '../models/order.js'
 
 // GET - 得到所有會員資料
@@ -37,11 +38,20 @@ router.get('/:orderId', async function (req, res, next) {
   const order = await getOrderById(req.params.orderId)
   return res.json({ message: 'success', code: '200', order })
 })
-
+// GET - 得到指定使用者全部訂單
 router.get('/userOrders/:userId', async function (req, res, next) {
   try {
     const orders = await getOrdersByUserId(req.params.userId)
     res.json({ message: 'success', code: '200', orders })
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+// GET - 得到指定訂單的明細
+router.get('/orderItems/:orderId', async function (req, res, next) {
+  try {
+    const orderItems = await getItemsByOrderId(req.params.orderId)
+    res.json({ message: 'success', code: '200', orderItems })
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' })
   }

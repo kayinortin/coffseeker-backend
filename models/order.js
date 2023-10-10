@@ -46,6 +46,14 @@ const getOrdersByUserId = async (userId) => {
   const { rows } = await executeQuery(sql)
   return rows
 }
+const getItemsByOrderId = async (orderId) => {
+  const sql = `SELECT product.id , product.image , product.name ,product.discountPrice , order_items.amount
+  FROM order_items
+  INNER JOIN product ON order_items.product_id = product.id
+  WHERE order_items.order_id = ${orderId};`
+  const { rows } = await executeQuery(sql)
+  return rows
+}
 
 export {
   cleanAll,
@@ -60,4 +68,5 @@ export {
   updateOrderById,
   verifyOrder,
   getOrdersByUserId,
+  getItemsByOrderId,
 }
