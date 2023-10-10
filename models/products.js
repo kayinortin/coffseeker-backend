@@ -1,5 +1,12 @@
 // 資料庫查詢處理函式
-import { find, findOneById, insertMany, cleanTable, count } from './base.js'
+import {
+  find,
+  findOneById,
+  insertMany,
+  cleanTable,
+  count,
+  update,
+} from './base.js'
 
 // 定義資料庫表格名稱
 const table = 'product'
@@ -8,6 +15,11 @@ const table = 'product'
 // 查詢所有資料
 const getProducts = async () => {
   const { rows } = await find(table)
+  return rows
+}
+
+const updateProduct = async (id, data) => {
+  const { rows } = await update(table, data, { id: id })
   return rows
 }
 
@@ -55,4 +67,5 @@ export {
   createBulkProducts,
   cleanAll,
   countWithQS,
+  updateProduct,
 }
