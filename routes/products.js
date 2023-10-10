@@ -13,11 +13,22 @@ import sqlString from 'sqlstring'
 function handleMultipleValues(field, values) {
   if (values) {
     const valuesArray = values.split(',')
-    return `${field} IN (${valuesArray
-      .map((v) => sqlString.escape('%' + v + '%'))
-      .join(',')})`
+    const orConditions = valuesArray.map(
+      (v) => `${field} LIKE ${sqlString.escape('%' + v + '%')}`
+    )
+    return orConditions.join(' OR ')
   }
   return ''
+}
+
+function createSearchConditions(searchString) {
+  const searchKeywordsArr = searchString.split(',')
+  const searchConditions = searchKeywordsArr.map((keyword) => {
+    return `name LIKE ${sqlString.escape(
+      '%' + keyword + '%'
+    )} OR description LIKE ${sqlString.escape('%' + keyword + '%')}`
+  })
+  return searchConditions.join(' OR ')
 }
 
 router.get('/qs', async (req, res, next) => {
@@ -37,37 +48,44 @@ router.get('/qs', async (req, res, next) => {
 
   const conditions = []
 
-  conditions[0] = keyword
-    ? `name LIKE ${sqlString.escape('%' + keyword + '%')}`
-    : ''
-  conditions[1] = handleMultipleValues('description', description)
-  conditions[2] = handleMultipleValues('origin', origin)
-  conditions[3] = handleMultipleValues('Roast_degree', Roast_degree)
-  conditions[4] = handleMultipleValues('Processing', Processing)
-  conditions[5] = handleMultipleValues('Variety', Variety)
-
-  // 模糊搜尋商品名稱(name)與敘述(description)
-  // 處理模糊搜尋字串的函式，預設搜尋字串用逗號分隔，例如"api/products/qs?search=中焙,花香"，會顯示所有商品名稱以及敘述有中焙或花香的商品
-  function createSearchConditions(searchString) {
-    const searchKeywordsArr = searchString.split(',')
-    const searchConditions = searchKeywordsArr.map((keyword) => {
-      return `name LIKE ${sqlString.escape(
-        '%' + keyword + '%'
-      )} OR description LIKE ${sqlString.escape('%' + keyword + '%')}`
-    })
-    return searchConditions.join(' OR ')
+  if (keyword) {
+    conditions.push(`name LIKE ${sqlString.escape('%' + keyword + '%')}`)
   }
+
+  const descriptionCondition = handleMultipleValues('description', description)
+  if (descriptionCondition) {
+    conditions.push(descriptionCondition)
+  }
+
+  const originCondition = handleMultipleValues('origin', origin)
+  if (originCondition) {
+    conditions.push(originCondition)
+  }
+
+  const RoastCondition = handleMultipleValues('Roast_degree', Roast_degree)
+  if (RoastCondition) {
+    conditions.push(RoastCondition)
+  }
+
+  const ProcessingCondition = handleMultipleValues('Processing', Processing)
+  if (ProcessingCondition) {
+    conditions.push(ProcessingCondition)
+  }
+
+  const VarietyCondition = handleMultipleValues('Variety', Variety)
+  if (VarietyCondition) {
+    conditions.push(VarietyCondition)
+  }
+
   if (search) {
-    conditions[3] = createSearchConditions(search)
+    conditions.push(createSearchConditions(search))
   }
 
-  // 價格
   const priceRanges = price_range ? price_range.split(',') : []
   const min = Number(priceRanges[0])
   const max = Number(priceRanges[1])
-  // 價格要介於1500~10000間
   if (min >= 100 && max <= 10000) {
-    conditions[5] = `discountPrice BETWEEN ${min} AND ${max}`
+    conditions.push(`discountPrice BETWEEN ${min} AND ${max}`)
   }
 
   const conditionsValues = conditions.filter((v) => v)
@@ -76,20 +94,15 @@ router.get('/qs', async (req, res, next) => {
       ? `WHERE ` + conditionsValues.map((v) => `( ${v} )`).join(' AND ')
       : ''
 
-  // 分頁用
-  // page預設為1，perpage預設為10
-  const perpageNow = Number(perpage) || 10
+  const perpageNow = Number(perpage) || 10000
   const pageNow = Number(page) || 1
   const limit = perpageNow
-  // page=1 offset=0 ; page=2 offset= perpage * 1; ...
   const offset = (pageNow - 1) * perpageNow
 
-  // 排序用，預設使用id, asc
   const order = orderby
     ? { [orderby.split(',')[0]]: orderby.split(',')[1] }
     : { id: 'asc' }
 
-  // 查詢
   const total = await countWithQS(where)
   const products = await getProductsWithQS(where, order, limit, offset)
   const result = {
