@@ -8,6 +8,7 @@ import {
   getCouponWithQS,
   getCouponById,
   countWithQS,
+  getCouponByUserId,
 } from '../models/coupons.js'
 // 專用處理sql字串的工具，主要format與escape，防止sql injection
 import sqlString from 'sqlstring'
@@ -118,6 +119,15 @@ router.get('/', async (req, res, next) => {
   // 讀入範例資料
   const coupons = await getCoupons()
   res.json({ coupons })
+})
+
+router.get('/userCoupons/:userId', async function (req, res, next) {
+  try {
+    const orders = await getCouponByUserId(req.params.userId)
+    res.json({ message: 'success', code: '200', orders })
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' })
+  }
 })
 
 export default router
