@@ -56,7 +56,9 @@ router.get('/qs', async (req, res, next) => {
     })
     return searchConditions.join(' OR ')
   }
-  conditions[3] = createSearchConditions(search)
+  if (search) {
+    conditions[3] = createSearchConditions(search)
+  }
 
   // 價格
   const priceRanges = price_range ? price_range.split(',') : []

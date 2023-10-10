@@ -1,5 +1,12 @@
 // 資料庫查詢處理函式
-import { find, findOneById, insertMany, cleanTable, count } from './base.js'
+import {
+  find,
+  findOneById,
+  insertMany,
+  cleanTable,
+  count,
+  executeQuery,
+} from './base.js'
 
 // 定義資料庫表格名稱
 const table = 'coupon'
@@ -48,6 +55,13 @@ const createBulkCoupon = async (users) => await insertMany(table, users)
 // 清除表格資料
 const cleanAll = async () => await cleanTable(table)
 
+//
+const getCouponByUserId = async (userId) => {
+  const sql = `SELECT * FROM ${table} WHERE user_id = ${userId}`
+  const { rows } = await executeQuery(sql)
+  return rows
+}
+
 export {
   getCoupons,
   getCouponWithQS,
@@ -55,4 +69,5 @@ export {
   createBulkCoupon,
   cleanAll,
   countWithQS,
+  getCouponByUserId,
 }
