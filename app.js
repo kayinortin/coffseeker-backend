@@ -61,12 +61,10 @@ const app = express()
 app.get('/webhook', (req, res) => {
   // Your verify token. Should be a random string.
   const VERIFY_TOKEN = '1234'
-
   // Parse the query params
   let mode = req.query['hub.mode']
   let token = req.query['hub.verify_token']
   let challenge = req.query['hub.challenge']
-
   // Checks if a token and mode is in the query string of the request
   if (mode && token) {
     // Checks the mode and token sent is correct
@@ -80,7 +78,6 @@ app.get('/webhook', (req, res) => {
     }
   }
 })
-
 // Creates the endpoint for your webhook
 app.post('/webhook', (req, res) => {
   let body = req.body
@@ -113,7 +110,6 @@ app.post('/webhook', (req, res) => {
     res.sendStatus(404)
   }
 })
-
 // Handles messages events
 function handleMessage(senderPsid, receivedMessage) {
   let response
@@ -160,7 +156,6 @@ function handleMessage(senderPsid, receivedMessage) {
   // Send the response message
   callSendAPI(senderPsid, response)
 }
-
 // Handles messaging_postbacks events
 function handlePostback(senderPsid, receivedPostback) {
   let response
@@ -177,7 +172,6 @@ function handlePostback(senderPsid, receivedPostback) {
   // Send the message to acknowledge the postback
   callSendAPI(senderPsid, response)
 }
-
 // Sends response messages via the Send API
 function callSendAPI(senderPsid, response) {
   // The page access token we have generated in your app settings
@@ -208,6 +202,8 @@ function callSendAPI(senderPsid, response) {
     }
   )
 }
+
+
 // 檔案上傳
 // 選項參考: https://github.com/richardgirges/express-fileupload
 app.use(fileUpload())

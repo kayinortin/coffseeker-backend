@@ -8,6 +8,7 @@ import {
   getProductsWithQS,
   getProductById,
   countWithQS,
+  updateProduct,
 } from '../models/products.js'
 // 專用處理sql字串的工具，主要format與escape，防止sql injection
 import sqlString from 'sqlstring'
@@ -21,8 +22,6 @@ router.get('/qs', async (req, res, next) => {
     keyword,
     product_ids,
     colors,
-    tags,
-    sizes,
     orderby,
     perpage,
     price_range,
@@ -93,19 +92,6 @@ router.get('/qs', async (req, res, next) => {
   // 查詢
   const total = await countWithQS(where)
   const products = await getProductsWithQS(where, order, limit, offset)
-
-  // json回傳範例
-  //
-  // {
-  //   total: 100,
-  //   perpage: 10,
-  //   page: 1,
-  //   data:[
-  //     {id:123, name:'',...},
-  //     {id:123, name:'',...}
-  //   ]
-  // }
-
   const result = {
     total,
     perpage: Number(perpage),
@@ -132,6 +118,12 @@ router.get('/', async (req, res, next) => {
   // 讀入範例資料
   const products = await getProducts()
   res.json({ products })
+})
+
+// 更新單筆資料
+router.put('/:pid', async (req, res, next) => {
+  const product = await updateProduct(req.params.pid, req.body)
+  res.json({ product: product })
 })
 
 export default router
