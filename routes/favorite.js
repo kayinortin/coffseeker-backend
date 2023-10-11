@@ -5,20 +5,23 @@ import { executeQuery } from '../models/base.js'
 
 import authenticate from '../middlewares/jwt.js'
 
-// 獲得某會員id的有加入到我的最愛清單中的商品id們
-router.get('/my-favorite', authenticate, async (req, res, next) => {
-  const sql = `SELECT f.pid
-        FROM favorites AS f
-        WHERE f.uid = ${req.user.id}
-        ORDER BY f.pid ASC;`
+//==================收藏商品================
+// 獲得某會員id的有加入到我的收藏清單中的商品id們
+//例如"favorite/my-favorite-product/1"會得到{"favoriteProducts": [2,3,4,5]}
+router.get('/my-favorite-product/:uid', async (req, res, next) => {
+  const sql = `SELECT f.product_id
+        FROM favorite_product AS f
+        WHERE f.user_id = ${req.params.uid}
+        ORDER BY f.product_id ASC;`
 
   const { rows } = await executeQuery(sql)
   // 將結果中的pid取出變為一個純資料的陣列
-  const favorites = rows.map((v) => v.pid)
+  const favoriteProducts = rows.map((v) => v.product_id)
 
-  res.json({ favorites })
+  res.json({ favoriteProducts })
 })
 
+//這個沒用到
 router.get('/all-products-no-login', async (req, res, next) => {
   const sql = `SELECT p.*
     FROM products AS p
@@ -29,6 +32,7 @@ router.get('/all-products-no-login', async (req, res, next) => {
   res.json({ products: rows })
 })
 
+//這個沒用到
 router.get('/all-products', authenticate, async (req, res, next) => {
   const user = req.user
   const uid = user.id
@@ -54,30 +58,25 @@ router.get('/all-products', authenticate, async (req, res, next) => {
   res.json({ products })
 })
 
-router.get('/fav-products', authenticate, async (req, res, next) => {
-  const user = req.user
-  const uid = user.id
+//取得特定ID使用者的收藏商品，附上商品細節(會員中心顯示用)
+router.get('/my-favorite-product-detail/:uid', async (req, res, next) => {
+  const uid = req.params.uid
 
-  const sql = `SELECT p.*
-FROM products AS p
-    INNER JOIN favorites AS f ON f.pid = p.id
-    AND f.uid = ${uid}
-ORDER BY p.id ASC`
+  const sql = `SELECT p.*, f.addedFavDate
+  FROM product AS p
+  INNER JOIN favorite_product AS f ON f.product_id = p.id
+  WHERE f.user_id = ${uid}
+  ORDER BY p.id ASC`
 
   const { rows } = await executeQuery(sql)
-
-  console.log(rows)
 
   res.json({ products: rows })
 })
 
-router.put('/:pid', authenticate, async (req, res, next) => {
-  const pid = req.params.pid
-
-  const user = req.user
-  const uid = user.id
-
-  const sql = `INSERT INTO favorites (uid, pid) VALUES (${uid}, ${pid})`
+//新增特定ID使用者的收藏商品，需要傳入user_id,product_id,addedFavDate
+router.post('/favorite-product', async (req, res, next) => {
+  const { user_id, product_id, addedFavDate } = req.body
+  const sql = `INSERT INTO favorite_product (user_id, product_id, addedFavDate) VALUES (${user_id}, ${product_id}, '${addedFavDate}')`
 
   const { rows } = await executeQuery(sql)
 
@@ -90,13 +89,12 @@ router.put('/:pid', authenticate, async (req, res, next) => {
   }
 })
 
-router.delete('/:pid', authenticate, async (req, res, next) => {
+//刪除特定ID使用者的收藏商品，需要傳入user_id,product_id
+router.delete('/favorite-product/:uid/:pid', async (req, res, next) => {
   const pid = req.params.pid
+  const uid = req.params.uid
 
-  const user = req.user
-  const uid = user.id
-
-  const sql = `DELETE FROM favorites WHERE pid=${pid} AND uid=${uid}; `
+  const sql = `DELETE FROM favorite_product WHERE product_id=${pid} AND user_id=${uid}; `
 
   const { rows } = await executeQuery(sql)
 
@@ -109,4 +107,68 @@ router.delete('/:pid', authenticate, async (req, res, next) => {
   }
 })
 
+//=====================收藏課程==============
+// 獲得某會員id的有加入到我的收藏清單中的商品id們
+//例如"favorite/my-favorite-product/1"會得到{"favoriteCourses": [1,2,3]}
+router.get('/my-favorite-course/:uid', async (req, res, next) => {
+  const sql = `SELECT c.course_id
+        FROM favorite_course AS c
+        WHERE c.user_id = ${req.params.uid}
+        ORDER BY c.course_id ASC;`
+
+  const { rows } = await executeQuery(sql)
+  // 將結果中的cid取出變為一個純資料的陣列
+  const favoriteCourses = rows.map((v) => v.course_id)
+
+  res.json({ favoriteCourses: favoriteCourses })
+})
+
+//取得特定ID使用者的收藏課程，附上商品細節(會員中心顯示用)
+router.get('/my-favorite-course-detail/:uid', async (req, res, next) => {
+  const uid = req.params.uid
+
+  const sql = `SELECT c.*, f.addedFavDate
+  FROM course AS c
+  INNER JOIN favorite_course AS f ON f.course_id = c.id
+  WHERE f.user_id = ${uid}
+  ORDER BY c.id ASC`
+
+  const { rows } = await executeQuery(sql)
+
+  res.json({ courses: rows })
+})
+
+//新增特定ID使用者的收藏課程，需要傳入user_id,course_id,addedFavDate
+router.post('/favorite-course', async (req, res, next) => {
+  const { user_id, course_id, addedFavDate } = req.body
+  const sql = `INSERT INTO favorite_course (user_id, course_id, addedFavDate) VALUES (${user_id}, ${course_id}, '${addedFavDate}')`
+
+  const { rows } = await executeQuery(sql)
+
+  console.log(rows.affectedRows)
+
+  if (rows.affectedRows) {
+    return res.json({ message: 'success', code: '200' })
+  } else {
+    return res.json({ message: 'fail', code: '400' })
+  }
+})
+
+//刪除特定ID使用者的收藏課程，需要傳入user_id,course_id
+router.delete('/favorite-course/:uid/:cid', async (req, res, next) => {
+  const cid = req.params.cid
+  const uid = req.params.uid
+
+  const sql = `DELETE FROM favorite_course WHERE course_id=${cid} AND user_id=${uid}; `
+
+  const { rows } = await executeQuery(sql)
+
+  console.log(rows.affectedRows)
+
+  if (rows.affectedRows) {
+    return res.json({ message: 'success', code: '200' })
+  } else {
+    return res.json({ message: 'fail', code: '400' })
+  }
+})
 export default router
