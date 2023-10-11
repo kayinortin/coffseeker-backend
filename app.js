@@ -53,6 +53,7 @@ import commentRouter from './routes/comment.js'
 import newsRouter from './routes/news.js'
 import courseRouter from './routes/course.js'
 import couponRouter from './routes/coupons.js'
+import courseComment from './routes/course-comment.js'
 
 // 以上為導入區，以下為使用區
 const app = express()
@@ -269,6 +270,7 @@ app.use('/api/comment', commentRouter)
 app.use('/api/news', newsRouter)
 app.use('/api/course', courseRouter)
 app.use('/api/coupons', couponRouter)
+app.use('/api/course-comment', courseComment)
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
   next(createError(404))
