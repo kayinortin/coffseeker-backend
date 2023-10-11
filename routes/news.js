@@ -208,36 +208,35 @@ router.get('/category/:cid', async (req, res, next) => {
       return res.status(404).json({ error: '找不到相應分類的消息' })
     }
 
-    // SQL 查詢，包括分頁邏輯
+    // SQL 查詢，不包括分頁邏輯
     const query = `
       SELECT * FROM news 
-      WHERE category_id = ? 
-      LIMIT ? OFFSET ?
+      WHERE category_id = ?
     `
 
-    const [rows, fields] = await pool.execute(query, [
-      categoryId,
-      perpageNow,
-      offset,
-    ])
+    const [rows, fields] = await pool.execute(query, [categoryId])
 
     // 檢查是否找到相應分類的消息
     if (rows.length === 0) {
       return res.status(404).json({ error: '找不到相應分類的消息' })
     }
 
-    // 計算總頁數
-    const countQuery = `
-      SELECT COUNT(*) as total FROM news
-      WHERE category_id = ?
-    `
+    // 排序這些資料，按照你的需求
+    rows.sort((a, b) => {
+      // 進行排序邏輯，根據你的需求排序
+      // 例如，按日期排序：
+      return new Date(b.created_at) - new Date(a.created_at)
+    })
 
-    const [countRows] = await pool.execute(countQuery, [categoryId])
-    const totalRows = countRows[0].total
+    // 計算總頁數
+    const totalRows = rows.length
     const totalPages = Math.ceil(totalRows / perpageNow)
 
+    // 切分分頁
+    const pageNews = rows.slice(offset, offset + perpageNow)
+
     // 返回包含新聞和總頁數的 JSON
-    res.json({ news: rows, totalPages })
+    res.json({ news: pageNews, totalPages })
   } catch (error) {
     console.error('資料獲取失敗:', error.message)
     res.status(500).json({ error: '資料獲取失敗，請重試。' })
