@@ -84,7 +84,7 @@ router.get('/qs', async (req, res, next) => {
   const priceRanges = price_range ? price_range.split(',') : []
   const min = Number(priceRanges[0])
   const max = Number(priceRanges[1])
-  if (min >= 100 && max <= 10000) {
+  if (min >= 100 && max <= 5000) {
     conditions.push(`discountPrice BETWEEN ${min} AND ${max}`)
   }
 
