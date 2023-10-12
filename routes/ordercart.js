@@ -14,6 +14,14 @@ import {
 } from '../models/ordercart.js'
 // 專用處理sql字串的工具，主要format與escape，防止sql injection
 import sqlString from 'sqlstring'
+import { log } from 'debug/src/browser.js'
+
+// 獲得所有資料
+router.get('/', async (req, res, next) => {
+  // 讀入範例資料
+  const orders = await getOrders()
+  res.json({ orders })
+})
 
 // 獲得所有資料，加入分頁與搜尋字串功能，單一資料表處理
 // products/qs?page=1&keyword=xxxx&cat_ids=1,2&sizes=1,2&tags=3,4&colors=1,2,3&orderby=id,asc&perpage=10&price_range=1500,10000
@@ -105,6 +113,32 @@ router.get('/qs', async (req, res, next) => {
   res.json(result)
 })
 
+//新增訂單資料
+router.post('/neworder', async (req, res, next) => {
+  const orderlist = req.body
+  console.log(orderlist)
+  // const {
+  //   total_price,
+  //   shipping_fee,
+  //   discount_price,
+  //   All_price,
+  //   payment_option,
+  //   delivery_option,
+  //   receiver_name,
+  //   receiver_phone,
+  //   receiver_address,
+  // } = req.body
+
+  // const sql = `INSERT INTO order_details (user_id, tracking_number, order_date, tally_date, shipping_date, finish_date, order_status, total_price, shipping_fee, discount_price, All_price, payment_option, delivery_option, receiver_name, receiver_phone, receiver_address) VALUES (${user_id}, '${tracking_number}', '${order_date}', '${tally_date}', '${shipping_date}', '${finish_date}', '${order_status}', ${total_price}, ${shipping_fee}, ${discount_price}, ${All_price}, '${payment_option}', '${delivery_option}', '${receiver_name}', '${receiver_phone}', '${receiver_address}')`
+
+  try {
+    const result = await res.json({ message: '訂單已成功加入' })
+    return result
+  } catch (error) {
+    res.status(500).json({ error: '無法插入訂單' + error.message })
+  }
+})
+
 // 獲得單筆資料
 router.get('/:pid', async (req, res, next) => {
   const order = await getOrderById(req.params.pid)
@@ -115,36 +149,5 @@ router.get('/:pid', async (req, res, next) => {
     return res.json({})
   }
 })
-
-// 獲得所有資料
-router.get('/', async (req, res, next) => {
-  // 讀入範例資料
-  const orders = await getOrders()
-  res.json({ orders })
-})
-
-//新增訂單資料
-// router.post('/neworder', async (req, res, next) => {
-//   const {
-//     total_price,
-//     shipping_fee,
-//     discount_price,
-//     All_price,
-//     payment_option,
-//     delivery_option,
-//     receiver_name,
-//     receiver_phone,
-//     receiver_address,
-//   } = req.body
-
-//   const sql = `INSERT INTO order_details (user_id, tracking_number, order_date, tally_date, shipping_date, finish_date, order_status, total_price, shipping_fee, discount_price, All_price, payment_option, delivery_option, receiver_name, receiver_phone, receiver_address) VALUES (${user_id}, '${tracking_number}', '${order_date}', '${tally_date}', '${shipping_date}', '${finish_date}', '${order_status}', ${total_price}, ${shipping_fee}, ${discount_price}, ${All_price}, '${payment_option}', '${delivery_option}', '${receiver_name}', '${receiver_phone}', '${receiver_address}')`
-
-//   try {
-//     const result = await insertOrder()
-//     res.json({ message: '訂單已成功加入', insertedId: result.insertedId })
-//   } catch (error) {
-//     res.status(500).json({ error: '無法插入訂單' + error.message })
-//   }
-// })
 
 export default router
