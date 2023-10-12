@@ -150,4 +150,38 @@ router.put('/:userId', async function (req, res, next) {
   return res.json({ message: 'success', code: '200' })
 })
 
+// =================================================================
+// post - 會員密碼更新
+router.post('/change-password', async (req, res) => {
+  const userId = req.body.id
+  const oldPassword = req.body.oldPassword
+  const user = req.body
+  console.log('userId', userId, 'oldPassword', oldPassword, 'user', user)
+
+  // 會員存在，將會員的資料取出
+  const member = await getUserById(userId)
+
+  if (!member) {
+    return res.json({ message: '沒有member', code: '400' })
+  }
+
+  // 驗證原密碼資料 如果不相符則return
+  if (oldPassword !== member.password) {
+    return res.json({ message: '舊密碼不相符', code: '400' })
+  }
+  // 資料表中沒有oldPassword這個欄位給sql更新 所以拿掉 oldPassword只為了在後端驗證原使用者密碼是否正確而存在
+  delete req.body.oldPassword
+  // 對資料庫執行update
+  const result = await updateUserById(user, userId)
+  console.log(result)
+
+  // 沒有更新到任何資料
+  if (!result.affectedRows) {
+    return res.json({ message: 'fail', code: '400' })
+  }
+
+  // 最後成功更新
+  return res.json({ message: 'success', code: '200' })
+})
+
 export default router
