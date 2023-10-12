@@ -13,28 +13,51 @@ const upload = multer({ dest: 'public/' })
 
 import {
   cleanAll,
-  createBulkUsers,
-  createUser,
-  deleteUserById,
+  createBulkOrders,
+  createOrder,
+  deleteOrderById,
   getCount,
-  getUser,
-  getUserById,
-  getUsers,
-  updateUser,
-  updateUserById,
-  verifyUser,
-} from '../models/users.js'
+  getOrder,
+  getOrderById,
+  getOrders,
+  updateOrder,
+  updateOrderById,
+  verifyOrder,
+  getOrdersByUserId,
+  getItemsByOrderId,
+} from '../models/order.js'
 
 // GET - 得到所有會員資料
 router.get('/', async function (req, res, next) {
-  const users = await getUsers()
-  return res.json({ message: 'success', code: '200', users })
+  const orders = await getOrders()
+  return res.json({ message: 'success', code: '200', orders })
 })
 
 // GET - 得到單筆資料(注意，有動態參數時要寫在GET區段最後面)
-router.get('/:userId', async function (req, res, next) {
-  const user = await getUserById(req.params.userId)
-  return res.json({ message: 'success', code: '200', user })
+router.get('/:orderId', async function (req, res, next) {
+  const order = await getOrderById(req.params.orderId)
+  return res.json({ message: 'success', code: '200', order })
+})
+// GET - 得到指定使用者全部訂單
+router.get('/userOrders/:userId/:orderBy', async function (req, res, next) {
+  try {
+    const orders = await getOrdersByUserId(
+      req.params.userId,
+      req.params.orderBy
+    )
+    res.json({ message: 'success', code: '200', orders })
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+// GET - 得到指定訂單的明細
+router.get('/orderItems/:orderId', async function (req, res, next) {
+  try {
+    const orderItems = await getItemsByOrderId(req.params.orderId)
+    res.json({ message: 'success', code: '200', orderItems })
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' })
+  }
 })
 
 // POST - 上傳檔案用，使用express-fileupload
@@ -80,25 +103,25 @@ router.post('/', async function (req, res, next) {
   // {
   //     "name":"金妮",
   //     "email":"ginny@test.com",
-  //     "username":"ginny",
+  //     "ordername":"ginny",
   //     "password":"12345"
   // }
 
-  // user是從瀏覽器來的資料
-  const user = req.body
+  // order是從瀏覽器來的資料
+  const order = req.body
 
   // 檢查從瀏覽器來的資料，如果為空物件則失敗
-  if (isEmpty(user)) {
+  if (isEmpty(order)) {
     return res.json({ message: 'fail-表單資料為空', code: '400' })
   }
 
-  // 這裡可以再檢查從react來的資料，哪些資料為必要(name, username...)
-  console.log(user)
+  // 這裡可以再檢查從react來的資料，哪些資料為必要(name, ordername...)
+  console.log(order)
 
-  // 先查詢資料庫是否有同username與email的資料
+  // 先查詢資料庫是否有同ordername與email的資料
   const countMail = await getCount({
-    // username: user.username,
-    email: user.email,
+    // ordername: order.ordername,
+    email: order.email,
   })
 
   // 檢查使用者是否存在
@@ -107,7 +130,7 @@ router.post('/', async function (req, res, next) {
   }
 
   // 新增至資料庫
-  const result = await createUser(user)
+  const result = await createOrder(order)
 
   // 不存在insertId -> 新增失敗
   if (!result.insertId) {
@@ -118,27 +141,27 @@ router.post('/', async function (req, res, next) {
   return res.json({
     message: 'success',
     code: '200',
-    user: { ...user, id: result.insertId },
+    order: { ...order, id: result.insertId },
   })
 })
 
 // PUT - 更新會員資料
-router.put('/:userId', async function (req, res, next) {
-  const userId = req.params.userId
-  const user = req.body
-  console.log(userId, user)
+router.put('/:orderId', async function (req, res, next) {
+  const orderId = req.params.orderId
+  const order = req.body
+  console.log(orderId, order)
 
-  // 檢查是否有從網址上得到userId
+  // 檢查是否有從網址上得到orderId
   // 檢查從瀏覽器來的資料，如果為空物件則失敗
-  if (!userId || isEmpty(user)) {
+  if (!orderId || isEmpty(order)) {
     return res.json({ message: 'error', code: '400' })
   }
 
-  // 這裡可以再檢查從react來的資料，哪些資料為必要(name, username...)
-  console.log(user)
+  // 這裡可以再檢查從react來的資料，哪些資料為必要(name, ordername...)
+  console.log(order)
 
   // 對資料庫執行update
-  const result = await updateUserById(user, userId)
+  const result = await updateOrderById(order, orderId)
   console.log(result)
 
   // 沒有更新到任何資料

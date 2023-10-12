@@ -45,6 +45,7 @@ import lineLoginRouter from './routes/line-login.js'
 import facebookLoginRouter from './routes/facebook-login.js'
 // 導入favorite路由
 import favoriteRouter from './routes/favorite.js'
+import orderRouter from './routes/order.js'
 // 導入checkcategory路由
 import checkCategoryRouter from './routes/checkcategory.js'
 // 導入comment路由
@@ -263,6 +264,8 @@ app.use('/api/line-login', lineLoginRouter)
 app.use('/api/facebook-login', facebookLoginRouter)
 app.use('/api/favorite', favoriteRouter)
 app.use('/api/checkcategory', checkCategoryRouter)
+app.use('/api/order', orderRouter)
+
 app.use('/api/comment', commentRouter)
 app.use('/api/news', newsRouter)
 app.use('/api/course', courseRouter)
