@@ -40,12 +40,46 @@ const getOrder = async ({ email, password }) =>
 // 其它用途
 const cleanAll = async () => await cleanTable(table)
 
-// 找尋指定使用者Id的所有訂單
-const getOrdersByUserId = async (userId, orderBy) => {
-  const sql = `SELECT * FROM ${table} WHERE user_id = ${userId} ORDER BY order_date ${orderBy}`
+// 找尋指定使用者Id的所有訂單(全訂單)
+// const getOrdersByUserId = async (userId, orderBy) => {
+//   const sql = `SELECT * FROM ${table} WHERE user_id = ${userId} ORDER BY order_date ${orderBy}`
+//   const { rows } = await executeQuery(sql)
+//   return rows
+// }
+
+const getOrderTotalPage = async (userId) => {
+  //先將資料全部抽出
+  const countSql = `
+  SELECT COUNT(*) as total
+  FROM ${table}
+  WHERE user_id = ${userId}
+  `
+  const countResult = await executeQuery(countSql)
+  const totalRecords = countResult.rows[0].total
+
+  const itemsPerPage = 8
+
+  // 計算總頁數
+  const totalPages = Math.ceil(totalRecords / itemsPerPage)
+  return totalPages
+}
+
+// 找尋指定使用者Id的所有訂單(分頁版)
+const getOrdersByUserId = async (userId, orderBy, page) => {
+  const itemsPerPage = 8
+  const offset = (page - 1) * itemsPerPage
+  const sql = `
+  SELECT *
+  FROM ${table}
+  WHERE user_id = ${userId}
+  ORDER BY order_date ${orderBy}
+  LIMIT ${itemsPerPage}
+  OFFSET ${offset}
+  `
   const { rows } = await executeQuery(sql)
   return rows
 }
+
 const getItemsByOrderId = async (orderId) => {
   const sql = `SELECT product.id , product.image , product.name ,product.discountPrice , order_items.amount
   FROM order_items
@@ -69,4 +103,5 @@ export {
   verifyOrder,
   getOrdersByUserId,
   getItemsByOrderId,
+  getOrderTotalPage,
 }
