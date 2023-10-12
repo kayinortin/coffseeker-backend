@@ -39,9 +39,12 @@ router.get('/:orderId', async function (req, res, next) {
   return res.json({ message: 'success', code: '200', order })
 })
 // GET - 得到指定使用者全部訂單
-router.get('/userOrders/:userId', async function (req, res, next) {
+router.get('/userOrders/:userId/:orderBy', async function (req, res, next) {
   try {
-    const orders = await getOrdersByUserId(req.params.userId)
+    const orders = await getOrdersByUserId(
+      req.params.userId,
+      req.params.orderBy
+    )
     res.json({ message: 'success', code: '200', orders })
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' })

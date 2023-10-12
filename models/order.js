@@ -41,8 +41,8 @@ const getOrder = async ({ email, password }) =>
 const cleanAll = async () => await cleanTable(table)
 
 // 找尋指定使用者Id的所有訂單
-const getOrdersByUserId = async (userId) => {
-  const sql = `SELECT * FROM ${table} WHERE user_id = ${userId}`
+const getOrdersByUserId = async (userId, orderBy) => {
+  const sql = `SELECT * FROM ${table} WHERE user_id = ${userId} ORDER BY order_date ${orderBy}`
   const { rows } = await executeQuery(sql)
   return rows
 }
