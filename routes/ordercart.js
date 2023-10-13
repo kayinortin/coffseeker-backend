@@ -146,7 +146,7 @@ router.post('/neworder', async (req, res, next) => {
 
       for (const product of orderProducts) {
         await pool.execute(orderProductsql, [
-          orderList.tracking_number, // 使用主订单的跟踪号
+          orderList.tracking_number,
           product.product_id,
           product.amount,
           product.price,
@@ -160,7 +160,7 @@ router.post('/neworder', async (req, res, next) => {
 
       for (const course of orderCourses) {
         await pool.execute(orderCoursesql, [
-          orderList.tracking_number, // 使用主订单的跟踪号
+          orderList.tracking_number,
           course.course_id,
         ])
       }
