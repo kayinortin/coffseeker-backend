@@ -50,8 +50,6 @@ router.get('/qs', async (req, res, next) => {
     price_range,
   } = req.query
 
-  // TODO: 這裡可以檢查各query string正確性或給預設值，檢查不足可能會產生查詢錯誤
-
   // 建立資料庫搜尋條件
   const conditions = []
 
@@ -99,6 +97,16 @@ router.get('/qs', async (req, res, next) => {
   conditions[4] = size_ids
     .map((v) => `FIND_IN_SET(${Number(v)}, size)`)
     .join(' OR ')
+
+  let zhLatter_art
+
+  if (latte_art === 'beginer') {
+    zhLatter_art = '入門'
+  }
+
+  console.log(latte_art)
+  conditions.push(zhLatter_art ? `course_level_id = ${zhLatter_art}` : '')
+  //   conditions.push(cate_2 ? `category_2 IN (${cate_2})` : '')
 
   // 價格
   const priceRanges = price_range ? price_range.split(',') : []
