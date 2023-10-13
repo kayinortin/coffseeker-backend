@@ -21,8 +21,16 @@ router.get('/', async (req, res) => {
 router.post('/add', async (req, res) => {
   try {
     // 從請求的查詢參數中獲取 course_id
-    const { course_id, user_id, user_email, user_name, comment, date, rating } =
-      req.body
+    const {
+      course_id,
+      user_id,
+      user_email,
+      user_name,
+      comment,
+      date,
+      rating,
+      product_id,
+    } = req.body
 
     // 使用 checkOrder 函數
     const result = await checkOrder(course_id, user_id)
@@ -40,7 +48,8 @@ router.post('/add', async (req, res) => {
       user_name,
       comment,
       date,
-      rating
+      rating,
+      product_id
     )
 
     if (newComment && newComment.insertId) {

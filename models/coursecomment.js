@@ -35,7 +35,7 @@ const addComment = async (
     return checkComment
   } else {
     const [newComment] = await pool.execute(
-      'INSERT INTO coffseeker_db.comments (course_id, user_id, user_email, user_name, comment, create_at, rating) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      'INSERT INTO coffseeker_db.comments (product_id,course_id, user_id, user_email, user_name, comment, create_at, rating) VALUES (0,?, ?, ?, ?, ?, ?, ?)',
       [course_id, user_id, user_email, user_name, comment, date, rating]
     )
     return newComment
