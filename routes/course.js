@@ -12,6 +12,24 @@ import {
 // 專用處理sql字串的工具，主要format與escape，防止sql injection
 import sqlString from 'sqlstring'
 
+function handleMultipleValues(field, values) {
+  if (values) {
+    const valuesArray = values.split(',')
+    const orConditions = valuesArray.map(
+      (v) => `${field} LIKE ${sqlString.escape('%' + v + '%')}`
+    )
+    return orConditions.join('OR')
+  }
+  return ''
+}
+
+function createSearchConditions(searchString) {
+  const searchKeywordsArr = searchString.split(',')
+  const searchConditions = searchKeywordsArr.map((keyword) => {
+    return `name LIKE ${sqlString.escape('%' + keyword + '%')}`
+  })
+  return searchConditions.join('OR')
+}
 // 獲得所有資料，加入分頁與搜尋字串功能，單一資料表處理
 // courses/qs?page=1&keyword=xxxx&cat_ids=1,2&sizes=1,2&tags=3,4&colors=1,2,3&orderby=id,asc&perpage=10&price_range=1500,10000
 router.get('/qs', async (req, res, next) => {
@@ -25,13 +43,34 @@ router.get('/qs', async (req, res, next) => {
     sizes,
     orderby,
     perpage,
+    latte_art,
+    search,
+    pour,
+    roast,
     price_range,
   } = req.query
 
-  // TODO: 這裡可以檢查各query string正確性或給預設值，檢查不足可能會產生查詢錯誤
-
   // 建立資料庫搜尋條件
   const conditions = []
+
+  const ArtCondition = handleMultipleValues('latte_art', latte_art)
+  if (ArtCondition) {
+    conditions.push(ArtCondition)
+  }
+
+  const PourCondition = handleMultipleValues('pour', pour)
+  if (PourCondition) {
+    conditions.push(PourCondition)
+  }
+
+  const RoastCondition = handleMultipleValues('roast', roast)
+  if (RoastCondition) {
+    conditions.push(RoastCondition)
+  }
+
+  if (search) {
+    conditions.push(createSearchConditions(search))
+  }
 
   // 關鍵字 keyword 使用 `name LIKE '%keyword%'`
   conditions[0] = keyword
@@ -58,6 +97,16 @@ router.get('/qs', async (req, res, next) => {
   conditions[4] = size_ids
     .map((v) => `FIND_IN_SET(${Number(v)}, size)`)
     .join(' OR ')
+
+  let zhLatter_art
+
+  if (latte_art === 'beginer') {
+    zhLatter_art = '入門'
+  }
+
+  console.log(latte_art)
+  conditions.push(zhLatter_art ? `course_level_id = ${zhLatter_art}` : '')
+  //   conditions.push(cate_2 ? `category_2 IN (${cate_2})` : '')
 
   // 價格
   const priceRanges = price_range ? price_range.split(',') : []
