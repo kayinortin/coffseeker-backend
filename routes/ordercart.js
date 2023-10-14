@@ -1,5 +1,7 @@
 import express from 'express'
 const router = express.Router()
+import 'dotenv/config.js'
+import pool from '../config/db.js'
 
 import { readJsonFile } from '../utils/json-tool.js'
 
@@ -115,27 +117,67 @@ router.get('/qs', async (req, res, next) => {
 
 //新增訂單資料
 router.post('/neworder', async (req, res, next) => {
-  const orderlist = req.body
-  console.log(orderlist)
-  // const {
-  //   total_price,
-  //   shipping_fee,
-  //   discount_price,
-  //   All_price,
-  //   payment_option,
-  //   delivery_option,
-  //   receiver_name,
-  //   receiver_phone,
-  //   receiver_address,
-  // } = req.body
+  const orderList = req.body.orderList
+  const orderProducts = req.body.orderProducts
+  const orderCourses = req.body.orderCourses
+  console.log(orderList)
+  console.log(orderProducts)
+  console.log(orderCourses)
 
-  // const sql = `INSERT INTO order_details (user_id, tracking_number, order_date, tally_date, shipping_date, finish_date, order_status, total_price, shipping_fee, discount_price, All_price, payment_option, delivery_option, receiver_name, receiver_phone, receiver_address) VALUES (${user_id}, '${tracking_number}', '${order_date}', '${tally_date}', '${shipping_date}', '${finish_date}', '${order_status}', ${total_price}, ${shipping_fee}, ${discount_price}, ${All_price}, '${payment_option}', '${delivery_option}', '${receiver_name}', '${receiver_phone}', '${receiver_address}')`
+  const ordersql = `INSERT INTO order_details (user_id, tracking_number, subtotal, shipping_fee, discount_price, total_price, payment, delivery, receiver_name, receiver_phone, receiver_address) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
   try {
-    const result = await res.json({ message: '訂單已成功加入' })
-    return result
+    const [rows] = await pool.execute(ordersql, [
+      orderList.user_id,
+      orderList.tracking_number,
+      orderList.subtotal,
+      orderList.shipping_fee,
+      orderList.discount_price,
+      orderList.total_price,
+      orderList.payment,
+      orderList.delivery,
+      orderList.receiver_name,
+      orderList.receiver_phone,
+      orderList.receiver_address,
+    ])
+
+    if (orderProducts && orderProducts.length > 0) {
+      const orderProductsql = `INSERT INTO order_product(tracking_number, product_id, amount, price) VALUES (?, ?, ?, ?)`
+
+      for (const product of orderProducts) {
+        await pool.execute(orderProductsql, [
+          orderList.tracking_number,
+          product.product_id,
+          product.amount,
+          product.price,
+        ])
+      }
+    }
+
+    if (orderCourses && orderCourses.length > 0) {
+      const orderCoursesql = `INSERT INTO order_course (tracking_number, course_id,amount, price) VALUES (?, ?, ?, ?)`
+
+      for (const course of orderCourses) {
+        await pool.execute(orderCoursesql, [
+          orderList.tracking_number,
+          course.course_id,
+          1,
+          course.course_price,
+        ])
+      }
+    }
+
+    return res.json({
+      message: 'DB訂單已成功加入',
+      code: '200',
+      insertData: rows,
+    })
   } catch (error) {
-    res.status(500).json({ error: '無法插入訂單' + error.message })
+    console.error('DB新增訂單錯誤', error)
+    return res.status(500).json({
+      message: 'DB無法插入訂單',
+      code: '500',
+    })
   }
 })
 
