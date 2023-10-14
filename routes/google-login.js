@@ -37,7 +37,11 @@ router.post('/jwt', async function (req, res, next) {
     })
 
     // 使用httpOnly cookie來讓瀏覽器端儲存access token
-    res.cookie('accessToken', accessToken, { httpOnly: true })
+    res.cookie('accessToken', accessToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'Lax',
+    })
 
     // 傳送access token回應(react可以儲存在state中使用)
     // 傳送access token回應(react可以儲存在state中使用)
@@ -49,7 +53,7 @@ router.post('/jwt', async function (req, res, next) {
   } else {
     // 3. 不存在 -> 建立一個新會員資料(無帳號與密碼)，只有google來的資料 -> 執行登入工作
     const newUser = {
-      name: providerData.displayName,
+      username: providerData.displayName,
       email: providerData.email,
       google_uid: providerData.uid,
       photo_url: providerData.photoURL,
@@ -62,13 +66,19 @@ router.post('/jwt', async function (req, res, next) {
     // 如果沒必要，member的password資料不應該，也不需要回應給瀏覽器
     delete user.password
 
+    console.log(user)
+
     // 產生存取令牌(access token)，其中包含會員資料
     const accessToken = jsonwebtoken.sign({ ...user }, accessTokenSecret, {
       expiresIn: '24h',
     })
 
     // 使用httpOnly cookie來讓瀏覽器端儲存access token
-    res.cookie('accessToken', accessToken, { httpOnly: true })
+    res.cookie('accessToken', accessToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'Lax',
+    })
 
     // 傳送access token回應(react可以儲存在state中使用)
     return res.json({
@@ -112,7 +122,7 @@ router.post('/session', async function (req, res, next) {
   } else {
     // 3. 不存在 -> 建立一個新會員資料(無帳號與密碼)，只有google來的資料 -> 執行登入工作
     const newUser = {
-      name: providerData.displayName,
+      username: providerData.displayName,
       email: providerData.email,
       google_uid: providerData.uid,
       photo_url: providerData.photoURL,
