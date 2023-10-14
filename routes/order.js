@@ -24,7 +24,8 @@ import {
   updateOrderById,
   verifyOrder,
   getOrdersByUserId,
-  getItemsByOrderId,
+  getProductItemsByOrderId,
+  getCourseItemsByOrderId,
   getOrderTotalPage,
 } from '../models/order.js'
 
@@ -59,8 +60,10 @@ router.get(
 // GET - 得到指定訂單的明細
 router.get('/orderItems/:orderId', async function (req, res, next) {
   try {
-    const orderItems = await getItemsByOrderId(req.params.orderId)
-    res.json({ message: 'success', code: '200', orderItems })
+    const orderItems = await getProductItemsByOrderId(req.params.orderId)
+
+    const orderCourse = await getCourseItemsByOrderId(req.params.orderId)
+    res.json({ message: 'success', code: '200', orderItems, orderCourse })
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' })
   }

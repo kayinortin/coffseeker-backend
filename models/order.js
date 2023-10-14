@@ -80,10 +80,18 @@ const getOrdersByUserId = async (userId, orderBy, page) => {
   return rows
 }
 
-const getItemsByOrderId = async (orderId) => {
+const getProductItemsByOrderId = async (orderId) => {
   const sql = `SELECT product.id , product.image , product.name ,product.discountPrice , order_items.amount
   FROM order_items
   INNER JOIN product ON order_items.product_id = product.id
+  WHERE order_items.order_id = ${orderId};`
+  const { rows } = await executeQuery(sql)
+  return rows
+}
+const getCourseItemsByOrderId = async (orderId) => {
+  const sql = `SELECT course.id , course.course_subpics AS image , course.course_name AS name ,course.course_price AS discountPrice , order_items.amount
+  FROM order_items
+  INNER JOIN course ON order_items.course_id = course.id
   WHERE order_items.order_id = ${orderId};`
   const { rows } = await executeQuery(sql)
   return rows
@@ -102,6 +110,7 @@ export {
   updateOrderById,
   verifyOrder,
   getOrdersByUserId,
-  getItemsByOrderId,
+  getProductItemsByOrderId,
+  getCourseItemsByOrderId,
   getOrderTotalPage,
 }
