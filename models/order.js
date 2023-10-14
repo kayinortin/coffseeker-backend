@@ -20,7 +20,8 @@ const getOrders = async () => {
   const { rows } = await find(table)
   return rows
 }
-const getOrderById = async (id) => await findOneById(table, id)
+const getOrderBytrackingNumber = async (tracking_number) =>
+  await findOneById(table, tracking_number)
 const getCount = async (where) => await count(table, where)
 const createOrder = async (user) => await insertOne(table, user)
 const createBulkOrders = async (users) => await insertMany(table, users)
@@ -80,11 +81,28 @@ const getOrdersByUserId = async (userId, orderBy, page) => {
   return rows
 }
 
-const getItemsByOrderId = async (orderId) => {
-  const sql = `SELECT product.id , product.image , product.name ,product.discountPrice , order_items.amount
-  FROM order_items
-  INNER JOIN product ON order_items.product_id = product.id
-  WHERE order_items.order_id = ${orderId};`
+const getItemsBytrackingNunber = async (trackingNunber) => {
+  const sql = `SELECT 
+  product.id, 
+  product.image, 
+  product.name,
+  product.discountPrice, 
+  order_product.amount
+FROM order_product
+INNER JOIN product ON order_product.product_id = product.id
+WHERE order_product.tracking_number = ${trackingNunber}
+
+UNION
+
+SELECT 
+  course.id, 
+  course.course_subpics, 
+  course.course_name, 
+  course.course_price, 
+  order_course.amount
+FROM order_course
+INNER JOIN course ON order_course.course_id = course.id
+WHERE order_course.tracking_number = ${trackingNunber};`
   const { rows } = await executeQuery(sql)
   return rows
 }
@@ -96,12 +114,12 @@ export {
   deleteOrderById,
   getCount,
   getOrder,
-  getOrderById,
+  getOrderBytrackingNumber,
   getOrders,
   updateOrder,
   updateOrderById,
   verifyOrder,
   getOrdersByUserId,
-  getItemsByOrderId,
+  getItemsBytrackingNunber,
   getOrderTotalPage,
 }
