@@ -18,14 +18,13 @@ import {
   deleteOrderById,
   getCount,
   getOrder,
-  getOrderById,
+  getOrderBytrackingNumber,
   getOrders,
   updateOrder,
   updateOrderById,
   verifyOrder,
   getOrdersByUserId,
-  getProductItemsByOrderId,
-  getCourseItemsByOrderId,
+  getItemsBytrackingNunber,
   getOrderTotalPage,
 } from '../models/order.js'
 
@@ -36,8 +35,8 @@ router.get('/', async function (req, res, next) {
 })
 
 // GET - 得到單筆資料(注意，有動態參數時要寫在GET區段最後面)
-router.get('/:orderId', async function (req, res, next) {
-  const order = await getOrderById(req.params.orderId)
+router.get('/:tracking_number', async function (req, res, next) {
+  const order = await getOrderBytrackingNumber(req.params.tracking_number)
   return res.json({ message: 'success', code: '200', order })
 })
 // GET - 得到指定使用者全部訂單
@@ -58,12 +57,12 @@ router.get(
   }
 )
 // GET - 得到指定訂單的明細
-router.get('/orderItems/:orderId', async function (req, res, next) {
+router.get('/orderItems/:tracking_number', async function (req, res, next) {
   try {
-    const orderItems = await getProductItemsByOrderId(req.params.orderId)
-
-    const orderCourse = await getCourseItemsByOrderId(req.params.orderId)
-    res.json({ message: 'success', code: '200', orderItems, orderCourse })
+    const orderItems = await getItemsBytrackingNunber(
+      req.params.tracking_number
+    )
+    res.json({ message: 'success', code: '200', orderItems })
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' })
   }
