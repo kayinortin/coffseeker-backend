@@ -71,7 +71,7 @@ router.get(
   FROM product AS p
   INNER JOIN favorite_product AS f ON f.product_id = p.id
   WHERE f.user_id = ${uid}
-  ORDER BY p.id ASC`
+  ORDER BY f.addedFavDate DESC`
 
     const { rows } = await executeQuery(sql)
 
@@ -150,7 +150,7 @@ router.get(
   FROM course AS c
   INNER JOIN favorite_course AS f ON f.course_id = c.id
   WHERE f.user_id = ${uid}
-  ORDER BY c.id ASC`
+  ORDER BY f.addedFavDate DESC`
 
     const { rows } = await executeQuery(sql)
 
