@@ -10,7 +10,8 @@ import {
   getNewsById,
   countWithQS,
 } from '../models/news.js'
-// 專用處理sql字串的工具，主要format與escape，防止sql injection
+
+// 專用處理SQL字串的工具，主要format與escape，防止SQL注入
 import sqlString from 'sqlstring'
 import { body } from 'express-validator'
 
@@ -223,8 +224,6 @@ router.get('/category/:cid', async (req, res, next) => {
 
     // 排序這些資料，按照你的需求
     rows.sort((a, b) => {
-      // 進行排序邏輯，根據你的需求排序
-      // 例如，按日期排序：
       return new Date(b.created_at) - new Date(a.created_at)
     })
 
@@ -242,6 +241,51 @@ router.get('/category/:cid', async (req, res, next) => {
     res.status(500).json({ error: '資料獲取失敗，請重試。' })
   }
 })
+
+//領取優惠券區
+router.get('/coupons', async (req, res, next) => {
+  try {
+    const query = 'SELECT * FROM coupon WHERE coupon_valid = 1 '
+    const [rows, fields] = await pool.execute(query)
+    res.json(rows)
+  } catch (error) {
+    console.error('優惠券獲取失敗:', error.message)
+    res.status(500).json({ error: '優惠券獲取失敗，請重試。' })
+  }
+})
+
+// 更新會員領取優惠券
+router.post('/addCoupon', async (req, res) => {
+  const { couponId, userId } = req.body
+
+  // 檢查 userId 和 couponId 是否未定義
+  if (userId !== undefined && couponId !== undefined) {
+    try {
+      // 查詢優惠券
+      const queryCoupon = 'SELECT * FROM coupon WHERE coupon_id = ?'
+      const [couponRows, couponFields] = await pool.execute(queryCoupon, [
+        couponId,
+      ])
+
+      if (couponRows.length === 0) {
+        return res.status(404).json({ message: '優惠券不存在' })
+      }
+
+      // 更新優惠券的 user_id
+      const updateQuery = 'UPDATE coupon SET user_id = ? WHERE coupon_id = ?'
+      await pool.execute(updateQuery, [userId, couponId])
+
+      return res.json({ message: '成功領取優惠券' })
+    } catch (error) {
+      console.error('資料庫更新失败:', error.message)
+      return res.status(500).json({ message: '資料庫更新失败' })
+    }
+  } else {
+    res.status(400).json({ message: 'userId 和 couponId 必須提供' })
+  }
+})
+
+
 
 // 獲得單筆消息
 router.get('/:nid', async (req, res, next) => {
