@@ -21,6 +21,7 @@
     "express-fileupload": "^1.4.0",
     "express-session": "^1.17.3",
     "express-validator": "^7.0.1",
+    "google-auth-library": "^9.1.0",
     "http-errors": "~2.0.0",
     "https": "^1.0.0",
     "jsonwebtoken": "^9.0.2",
