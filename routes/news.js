@@ -245,7 +245,7 @@ router.get('/category/:cid', async (req, res, next) => {
 //領取優惠券區
 router.get('/coupons', async (req, res, next) => {
   try {
-    const query = 'SELECT * FROM coupon WHERE coupon_valid = 1 '
+    const query = 'SELECT * FROM user_coupon WHERE coupon_valid = 1 '
     const [rows, fields] = await pool.execute(query)
     res.json(rows)
   } catch (error) {
@@ -258,22 +258,79 @@ router.get('/coupons', async (req, res, next) => {
 router.post('/addCoupon', async (req, res) => {
   const { couponId, userId } = req.body
 
-  // 檢查 userId 和 couponId 是否未定義
   if (userId !== undefined && couponId !== undefined) {
     try {
-      // 查詢優惠券
-      const queryCoupon = 'SELECT * FROM coupon WHERE coupon_id = ?'
-      const [couponRows, couponFields] = await pool.execute(queryCoupon, [
-        couponId,
-      ])
+      // 檢查該優惠券是否已被領取
+      const checkUserCouponQuery = `
+        SELECT user_id, coupon_record
+        FROM coupon
+        WHERE user_id = ? AND coupon_record = ?
+      `
+      const [userCouponRows, userCouponFields] = await pool.execute(
+        checkUserCouponQuery,
+        [userId, couponId]
+      )
 
-      if (couponRows.length === 0) {
+      if (userCouponRows.length > 0) {
+        return res.status(400).json({ message: '會員已經領取過相同的優惠券' })
+      }
+
+      // 取得優惠券的詳細資訊
+      const getCouponInfoQuery = 'SELECT * FROM user_coupon WHERE coupon_id = ?'
+      const [couponInfoRows, couponInfoFields] = await pool.execute(
+        getCouponInfoQuery,
+        [couponId]
+      )
+
+      if (couponInfoRows.length === 0) {
         return res.status(404).json({ message: '優惠券不存在' })
       }
 
-      // 更新優惠券的 user_id
-      const updateQuery = 'UPDATE coupon SET user_id = ? WHERE coupon_id = ?'
-      await pool.execute(updateQuery, [userId, couponId])
+      // 插入優惠券到coupon資料表，並記錄到coupon_record欄位
+      const insertCouponQuery = `
+        INSERT INTO coupon (
+          coupon_name,
+          coupon_code,
+          coupon_valid,
+          valid_description,
+          discount_type,
+          discount_value,
+          start_at,
+          expires_at,
+          created_at,
+          updated_at,
+          max_usage,
+          used_times,
+          price_min,
+          usage_restriction,
+          user_id,
+          coupon_record
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `
+
+      const couponInfo = couponInfoRows[0]
+
+      const insertCouponValues = [
+        couponInfo.coupon_name,
+        couponInfo.coupon_code,
+        couponInfo.coupon_valid,
+        couponInfo.valid_description,
+        couponInfo.discount_type,
+        couponInfo.discount_value,
+        couponInfo.start_at,
+        couponInfo.expires_at,
+        couponInfo.created_at,
+        couponInfo.updated_at,
+        couponInfo.max_usage,
+        couponInfo.used_times,
+        couponInfo.price_min,
+        couponInfo.usage_restriction,
+        userId,
+        couponId, // 將coupon_id插入coupon_record欄位
+      ]
+
+      // 執行插入操作
+      await pool.execute(insertCouponQuery, insertCouponValues)
 
       return res.json({ message: '成功領取優惠券' })
     } catch (error) {
@@ -284,8 +341,6 @@ router.post('/addCoupon', async (req, res) => {
     res.status(400).json({ message: 'userId 和 couponId 必須提供' })
   }
 })
-
-
 
 // 獲得單筆消息
 router.get('/:nid', async (req, res, next) => {
