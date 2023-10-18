@@ -1,5 +1,6 @@
 import express from 'express'
 const router = express.Router()
+import pool from '../config/db.js'
 
 import { readJsonFile } from '../utils/json-tool.js'
 
@@ -129,6 +130,30 @@ router.get('/userCoupons/:userId', async function (req, res, next) {
     res.json({ message: 'success', code: '200', orders })
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
+//更新已使用的優惠卷valid 值
+
+router.put('/updatecoupon/:id', async (req, res, next) => {
+  const couponId = req.params.id
+  const newValidValue = 0
+  // console.log(couponId)
+
+  try {
+    const updateCouponSql = `UPDATE coupon SET coupon_valid = ? WHERE coupon_id = ?`
+    await pool.execute(updateCouponSql, [newValidValue, couponId])
+
+    return res.json({
+      message: 'Coupon已成功更新',
+      code: '200',
+    })
+  } catch (error) {
+    console.error('更新 Coupon 出錯', error)
+    return res.status(500).json({
+      message: '無法更新 Coupon ',
+      code: '500',
+    })
   }
 })
 
