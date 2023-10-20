@@ -89,21 +89,21 @@ router.post('/', async function (req, res, next) {
 
   // 檢查從瀏覽器來的資料，如果為空物件則失敗
   if (isEmpty(user)) {
-    return res.json({ message: 'fail', code: '400' })
+    return res.json({ message: 'fail-表單資料為空', code: '400' })
   }
 
   // 這裡可以再檢查從react來的資料，哪些資料為必要(name, username...)
   console.log(user)
 
   // 先查詢資料庫是否有同username與email的資料
-  const count = await getCount({
-    username: user.username,
+  const countMail = await getCount({
+    // username: user.username,
     email: user.email,
   })
 
   // 檢查使用者是否存在
-  if (count) {
-    return res.json({ message: 'fail', code: '400' })
+  if (countMail) {
+    return res.json({ message: 'fail-使用者已存在', code: '400' })
   }
 
   // 新增至資料庫
@@ -137,6 +137,40 @@ router.put('/:userId', async function (req, res, next) {
   // 這裡可以再檢查從react來的資料，哪些資料為必要(name, username...)
   console.log(user)
 
+  // 對資料庫執行update
+  const result = await updateUserById(user, userId)
+  console.log(result)
+
+  // 沒有更新到任何資料
+  if (!result.affectedRows) {
+    return res.json({ message: 'fail', code: '400' })
+  }
+
+  // 最後成功更新
+  return res.json({ message: 'success', code: '200' })
+})
+
+// =================================================================
+// post - 會員密碼更新
+router.post('/change-password', async (req, res) => {
+  const userId = req.body.id
+  const oldPassword = req.body.oldPassword
+  const user = req.body
+  console.log('userId', userId, 'oldPassword', oldPassword, 'user', user)
+
+  // 會員存在，將會員的資料取出
+  const member = await getUserById(userId)
+
+  if (!member) {
+    return res.json({ message: '沒有member', code: '400' })
+  }
+
+  // 驗證原密碼資料 如果不相符則return
+  if (oldPassword !== member.password) {
+    return res.json({ message: '舊密碼不相符', code: '400' })
+  }
+  // 資料表中沒有oldPassword這個欄位給sql更新 所以拿掉 oldPassword只為了在後端驗證原使用者密碼是否正確而存在
+  delete req.body.oldPassword
   // 對資料庫執行update
   const result = await updateUserById(user, userId)
   console.log(result)

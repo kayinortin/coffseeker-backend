@@ -1,5 +1,6 @@
 import express from 'express'
 const router = express.Router()
+import pool from '../config/db.js'
 
 import { readJsonFile } from '../utils/json-tool.js'
 
@@ -9,6 +10,8 @@ import {
   getCouponById,
   countWithQS,
   getCouponByUserId,
+  getCouponPagesByUserId,
+  getCouponTotalPage,
 } from '../models/coupons.js'
 // 專用處理sql字串的工具，主要format與escape，防止sql injection
 import sqlString from 'sqlstring'
@@ -129,5 +132,49 @@ router.get('/userCoupons/:userId', async function (req, res, next) {
     res.status(500).json({ error: 'Internal server error' })
   }
 })
+
+//更新已使用的優惠卷valid 值
+
+router.put('/updatecoupon/:id', async (req, res, next) => {
+  const couponId = req.params.id
+  const newValidValue = 0
+  // console.log(couponId)
+
+  try {
+    const updateCouponSql = `UPDATE coupon SET coupon_valid = ? WHERE coupon_id = ?`
+    await pool.execute(updateCouponSql, [newValidValue, couponId])
+
+    return res.json({
+      message: 'Coupon已成功更新',
+      code: '200',
+    })
+  } catch (error) {
+    console.error('更新 Coupon 出錯', error)
+    return res.status(500).json({
+      message: '無法更新 Coupon ',
+      code: '500',
+    })
+  }
+})
+
+// ！！！！！！！！！！！！！！！！！
+// 品睿的會員優惠券頁面使用
+// 收出指定使用者優惠券資料及計算分頁
+router.get(
+  '/getCouponPages/:userId/:orderBy/:page',
+  async function (req, res, next) {
+    try {
+      const coupons = await getCouponPagesByUserId(
+        req.params.userId,
+        req.params.orderBy,
+        req.params.page
+      )
+      const totalPage = await getCouponTotalPage(req.params.userId)
+      res.json({ message: 'success', code: '200', coupons, totalPage })
+    } catch (error) {
+      res.status(500).json({ error: 'Internal server error' })
+    }
+  }
+)
 
 export default router

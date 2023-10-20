@@ -10,7 +10,8 @@ import {
   getNewsById,
   countWithQS,
 } from '../models/news.js'
-// 專用處理sql字串的工具，主要format與escape，防止sql injection
+
+// 專用處理SQL字串的工具，主要format與escape，防止SQL注入
 import sqlString from 'sqlstring'
 import { body } from 'express-validator'
 
@@ -208,39 +209,136 @@ router.get('/category/:cid', async (req, res, next) => {
       return res.status(404).json({ error: '找不到相應分類的消息' })
     }
 
-    // SQL 查詢，包括分頁邏輯
+    // SQL 查詢，不包括分頁邏輯
     const query = `
       SELECT * FROM news 
-      WHERE category_id = ? 
-      LIMIT ? OFFSET ?
+      WHERE category_id = ?
     `
 
-    const [rows, fields] = await pool.execute(query, [
-      categoryId,
-      perpageNow,
-      offset,
-    ])
+    const [rows, fields] = await pool.execute(query, [categoryId])
 
     // 檢查是否找到相應分類的消息
     if (rows.length === 0) {
       return res.status(404).json({ error: '找不到相應分類的消息' })
     }
 
-    // 計算總頁數
-    const countQuery = `
-      SELECT COUNT(*) as total FROM news
-      WHERE category_id = ?
-    `
+    // 排序這些資料，按照你的需求
+    rows.sort((a, b) => {
+      return new Date(b.created_at) - new Date(a.created_at)
+    })
 
-    const [countRows] = await pool.execute(countQuery, [categoryId])
-    const totalRows = countRows[0].total
+    // 計算總頁數
+    const totalRows = rows.length
     const totalPages = Math.ceil(totalRows / perpageNow)
 
+    // 切分分頁
+    const pageNews = rows.slice(offset, offset + perpageNow)
+
     // 返回包含新聞和總頁數的 JSON
-    res.json({ news: rows, totalPages })
+    res.json({ news: pageNews, totalPages })
   } catch (error) {
     console.error('資料獲取失敗:', error.message)
     res.status(500).json({ error: '資料獲取失敗，請重試。' })
+  }
+})
+
+//領取優惠券區
+router.get('/coupons', async (req, res, next) => {
+  try {
+    const query = 'SELECT * FROM user_coupon WHERE coupon_valid = 1 '
+    const [rows, fields] = await pool.execute(query)
+    res.json(rows)
+  } catch (error) {
+    console.error('優惠券獲取失敗:', error.message)
+    res.status(500).json({ error: '優惠券獲取失敗，請重試。' })
+  }
+})
+
+// 更新會員領取優惠券
+router.post('/addCoupon', async (req, res) => {
+  const { couponId, userId } = req.body
+
+  if (userId !== undefined && couponId !== undefined) {
+    try {
+      // 檢查該優惠券是否已被領取
+      const checkUserCouponQuery = `
+        SELECT user_id, coupon_record
+        FROM coupon
+        WHERE user_id = ? AND coupon_record = ?
+      `
+      const [userCouponRows, userCouponFields] = await pool.execute(
+        checkUserCouponQuery,
+        [userId, couponId]
+      )
+
+      if (userCouponRows.length > 0) {
+        return res.status(400).json({ message: '會員已經領取過相同的優惠券' })
+      }
+
+      // 取得優惠券的詳細資訊
+      const getCouponInfoQuery = 'SELECT * FROM user_coupon WHERE coupon_id = ?'
+      const [couponInfoRows, couponInfoFields] = await pool.execute(
+        getCouponInfoQuery,
+        [couponId]
+      )
+
+      if (couponInfoRows.length === 0) {
+        return res.status(404).json({ message: '優惠券不存在' })
+      }
+
+      // 插入優惠券到coupon資料表，並記錄到coupon_record欄位
+      const insertCouponQuery = `
+        INSERT INTO coupon (
+          coupon_name,
+          coupon_code,
+          coupon_valid,
+          valid_description,
+          discount_type,
+          discount_value,
+          start_at,
+          expires_at,
+          created_at,
+          updated_at,
+          max_usage,
+          used_times,
+          price_min,
+          usage_restriction,
+          user_id,
+          coupon_record
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `
+
+      const couponInfo = couponInfoRows[0]
+
+      const insertCouponValues = [
+        couponInfo.coupon_name,
+        couponInfo.coupon_code,
+        couponInfo.coupon_valid,
+        couponInfo.valid_description,
+        couponInfo.discount_type,
+        couponInfo.discount_value,
+        couponInfo.start_at,
+        couponInfo.expires_at,
+        couponInfo.created_at,
+        couponInfo.updated_at,
+        couponInfo.max_usage,
+        couponInfo.used_times,
+        couponInfo.price_min,
+        couponInfo.usage_restriction,
+        userId,
+        couponId, // 將coupon_id插入coupon_record欄位
+      ]
+
+      // 執行插入操作
+      await pool.execute(insertCouponQuery, insertCouponValues)
+
+      return res.json({ message: '成功領取優惠券' })
+    } catch (error) {
+      console.error('資料庫更新失败:', error.message)
+      return res.status(500).json({ message: '資料庫更新失败' })
+    }
+  } else {
+    res.status(400).json({ message: 'userId 和 couponId 必須提供' })
   }
 })
 

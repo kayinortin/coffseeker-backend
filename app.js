@@ -45,6 +45,7 @@ import lineLoginRouter from './routes/line-login.js'
 import facebookLoginRouter from './routes/facebook-login.js'
 // 導入favorite路由
 import favoriteRouter from './routes/favorite.js'
+import orderRouter from './routes/order.js'
 // 導入checkcategory路由
 import checkCategoryRouter from './routes/checkcategory.js'
 // 導入comment路由
@@ -52,7 +53,8 @@ import commentRouter from './routes/comment.js'
 import newsRouter from './routes/news.js'
 import courseRouter from './routes/course.js'
 import couponRouter from './routes/coupons.js'
-
+import courseComment from './routes/course-comment.js'
+import ordercartRouter from './routes/ordercart.js'
 // 以上為導入區，以下為使用區
 const app = express()
 
@@ -203,7 +205,6 @@ function callSendAPI(senderPsid, response) {
   )
 }
 
-
 // 檔案上傳
 // 選項參考: https://github.com/richardgirges/express-fileupload
 app.use(fileUpload())
@@ -262,10 +263,14 @@ app.use('/api/line-login', lineLoginRouter)
 app.use('/api/facebook-login', facebookLoginRouter)
 app.use('/api/favorite', favoriteRouter)
 app.use('/api/checkcategory', checkCategoryRouter)
+app.use('/api/order', orderRouter)
+
 app.use('/api/comment', commentRouter)
 app.use('/api/news', newsRouter)
 app.use('/api/course', courseRouter)
 app.use('/api/coupons', couponRouter)
+app.use('/api/course-comment', courseComment)
+app.use('/api/ordercart', ordercartRouter)
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
   next(createError(404))

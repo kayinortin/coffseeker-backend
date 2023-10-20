@@ -71,7 +71,7 @@ const mailHtml = (otpToken) => `
         <br />
         <br />
         <a href="mailto:coffseeker@gmail.com"
-          >聯絡客服人員 >> coffseeker@gmail.com</a
+          >聯絡客服人員  coffseeker@gmail.com</a
         >
       </div>
 
@@ -86,7 +86,7 @@ const mailHtml = (otpToken) => `
       <p>COFFSEEKER 探索咖啡</p>
       <div class="center">
         <img
-          src="https://i.imgur.com/oaBZVxk.png"
+          src="https://i.imgur.com/DbZYoCI.png"
           alt="COFFSEEKER Logo"
           width="300"
         />
