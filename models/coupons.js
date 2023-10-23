@@ -66,7 +66,7 @@ const getCouponByUserId = async (userId) => {
 // 品睿優惠券頁面渲染用
 // 找尋指定使用者Id的所有優惠券(分頁版)
 const getCouponPagesByUserId = async (userId, orderBy, page) => {
-  const itemsPerPage = 8
+  const itemsPerPage = 6
   const offset = (page - 1) * itemsPerPage
   const sql = `
   SELECT *
@@ -93,7 +93,7 @@ const getCouponTotalPage = async (userId) => {
   const countResult = await executeQuery(countSql)
   const totalRecords = countResult.rows[0].total
 
-  const itemsPerPage = 8
+  const itemsPerPage = 6
 
   // 計算總頁數
   const totalPages = Math.ceil(totalRecords / itemsPerPage)
