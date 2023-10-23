@@ -88,7 +88,7 @@ const getCouponTotalPage = async (userId) => {
   const countSql = `
   SELECT COUNT(*) as total
   FROM ${table}
-  WHERE user_id = ${userId}
+  WHERE user_id = ${userId} AND coupon_valid = 1
   `
   const countResult = await executeQuery(countSql)
   const totalRecords = countResult.rows[0].total
