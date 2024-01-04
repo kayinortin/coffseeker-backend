@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start": "nodemon ./bin/www"
+    "start": "node ./bin/www"
   },
   "dependencies": {
     "@sendgrid/mail": "^7.7.0",
@@ -57,7 +57,7 @@
   "type": "module",
   "engines": {
     "yarn": ">= 1.6",
-    "node": ">= 16.0"
+    "node": ">= 18.0"
   },
   "nodemonConfig": {
     "ignore": [
