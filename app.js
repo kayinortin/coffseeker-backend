@@ -69,7 +69,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
 // app.use(cors())
 app.use(
   cors({
-    origin: ['https://coffseeker-frontend.onrender.com/'],
+    origin: ['https://coffseeker-frontend.onrender.com'],
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true,
   })
