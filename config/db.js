@@ -9,7 +9,7 @@ const pool = mysql.createPool({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_DATABASE,
   dateStrings: true,
-  socketPath: `/cloudsql/${process.env.DB_CONNECTION_NAME}`,
+  // socketPath: `/cloudsql/${process.env.DB_CONNECTION_NAME}`,
 })
 
 // 啟動時測試連線
