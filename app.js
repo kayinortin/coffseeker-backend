@@ -67,13 +67,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
 
 // 可以使用的CORS要求，options必要
 // app.use(cors())
-app.use(
-  cors({
-    origin: ['https://coffseeker-frontend.onrender.com'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    credentials: true,
-  })
-)
+app.use(cors())
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'))
