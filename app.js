@@ -78,6 +78,20 @@ app.use(express.urlencoded({ extended: false }))
 app.use(cookieParser())
 app.use(express.static(path.join(__dirname, 'public')))
 
+app.use(function (req, res, next) {
+  res.header('Access-Control-Allow-Origin', 'https://coffseeker.yenteli.com') // 更新這裡以允許的域名
+  res.header(
+    'Access-Control-Allow-Headers',
+    'Origin, X-Requested-With, Content-Type, Accept, Authorization'
+  )
+  res.header('Access-Control-Allow-Credentials', 'true')
+  if (req.method === 'OPTIONS') {
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH')
+    return res.status(200).json({})
+  }
+  next()
+})
+
 // fileStore的選項
 const fileStoreOptions = {}
 // session-cookie使用

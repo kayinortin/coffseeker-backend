@@ -1,14 +1,8 @@
 runtime: nodejs20
 env: standard
+service: default
 
 env_variables:
-  PORT: "3005"
-  DB_HOST: "10.33.192.3"
-  DB_PORT: "3306"
-  DB_USER: "admin"
-  DB_PASSWORD: "12345"
-  DB_DATABASE: "coffseeker_db"
-  DB_CONNECTION_NAME: "coffseeker:asia-east1:coffseeker-database"
   SMTP_TO_EMAIL: "coffseeker@gmail.com"
   SMTP_TO_PASSWORD: "cikjensceufwwakl"
   ACCESS_TOKEN_SECRET: "thisisverstrongaccesstokensecre"
@@ -18,9 +12,7 @@ env_variables:
   LINE_CHANNEL_SECRET: "ea6f6a568cf9851292c184e0c9f4abca"
   LINE_LOGIN_CALLBACK_URL: "http://localhost:3000/user-test/line-login-jwt"
   GOOGLE_CLIENT_ID: "481042802955-pdd3e9uc7t9o4coecbbab1r0fhfd8962.apps.googleusercontent.com"
-
-beta_settings:
-  cloud_sql_instances: "coffseeker:asia-east1:coffseeker-database"
+  DATABASE_URL: 'mysql://bej8dur3i1hh9c749jkh:pscale_pw_mVjn5zqvyB2jxx2pjFbznYtUqR2ScjKdSIwk1Pn0XLw@gcp.connect.psdb.cloud/coffseeker_db?ssl={"rejectUnauthorized":true}'
 
 automatic_scaling:
   min_idle_instances: 1
