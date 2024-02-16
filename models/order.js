@@ -58,7 +58,7 @@ const getOrderTotalPage = async (userId) => {
   const countResult = await executeQuery(countSql)
   const totalRecords = countResult.rows[0].total
 
-  const itemsPerPage = 8
+  const itemsPerPage = 6
 
   // 計算總頁數
   const totalPages = Math.ceil(totalRecords / itemsPerPage)
@@ -67,7 +67,7 @@ const getOrderTotalPage = async (userId) => {
 
 // 找尋指定使用者Id的所有訂單(分頁版)
 const getOrdersByUserId = async (userId, orderBy, page) => {
-  const itemsPerPage = 8
+  const itemsPerPage = 6
   const offset = (page - 1) * itemsPerPage
   const sql = `
   SELECT *
